@@ -1,6 +1,9 @@
 require "sinatra"
 require "gschool_database_connection"
 require "rack-flash"
+require "./lib/fish"
+require "./lib/users"
+require "active_record"
 
 class App < Sinatra::Application
   enable :sessions
@@ -15,8 +18,10 @@ class App < Sinatra::Application
     user = current_user
 
     if current_user
+      # users = User.where("id != ?", user[:id])
       users = @database_connection.sql("SELECT * FROM users WHERE id != #{user["id"]}")
       fish = @database_connection.sql("SELECT * FROM fish WHERE user_id = #{current_user["id"]}")
+
       erb :signed_in, locals: {current_user: user, users: users, fish_list: fish}
     else
       erb :signed_out
@@ -184,12 +189,7 @@ class App < Sinatra::Application
 
   def current_user
     if session[:user_id]
-      select_sql = <<-SQL
-      SELECT * FROM users
-      WHERE id = #{session[:user_id]}
-      SQL
-
-      @database_connection.sql(select_sql).first
+      User.find(session[:user_id])
     else
       nil
     end
