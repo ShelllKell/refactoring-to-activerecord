@@ -162,12 +162,7 @@ class App < Sinatra::Application
   end
 
   def authenticate_user
-    select_sql = <<-SQL
-    SELECT * FROM users
-    WHERE username = '#{params[:username]}' AND password = '#{params[:password]}'
-    SQL
-
-    @database_connection.sql(select_sql).first
+    User.where(:username => params[:username], :password => params[:password]).take
   end
 
   def current_user
