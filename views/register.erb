@@ -1,5 +1,9 @@
 <h2>Register</h2>
 
+<% if user != nil %>
+<p><%= user.errors.messages.values %></p>
+<% end %>
+
 <form action="/registrations" method="post">
   <ul>
     <li>

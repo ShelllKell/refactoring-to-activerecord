@@ -27,17 +27,17 @@ class App < Sinatra::Application
   end
 
   get "/register" do
-    erb :register
+    erb :register, :locals => {:user => nil}
   end
 
   post "/registrations" do
-    if validate_registration_params
-      User.create(:username => params[:username], :password => params[:password])
 
+    user = User.create(:username => params[:username], :password => params[:password])
+    if user.errors.messages == {}
       flash[:notice] = "Thanks for registering"
       redirect "/"
     else
-      erb :register
+      erb :register, :locals => {:user => user}
     end
   end
 
@@ -89,31 +89,6 @@ class App < Sinatra::Application
 
   private
 
-  def validate_registration_params
-    if params[:username] != "" && params[:password].length > 3 && username_available?(params[:username])
-      return true
-    end
-
-    error_messages = []
-
-    if params[:username] == ""
-      error_messages.push("Username is required")
-    end
-
-    if !username_available?(params[:username])
-      error_messages.push("Username has already been taken")
-    end
-
-    if params[:password] == ""
-      error_messages.push("Password is required")
-    elsif params[:password].length < 4
-      error_messages.push("Password must be at least 4 characters")
-    end
-
-    flash[:notice] = error_messages.join(", ")
-
-    false
-  end
 
   def validate_fish_params
     if params[:name] != "" && params[:wikipedia_page] != ""
