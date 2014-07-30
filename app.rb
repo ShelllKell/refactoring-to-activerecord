@@ -18,8 +18,7 @@ class App < Sinatra::Application
     user = current_user
 
     if current_user
-      # users = User.where("id != ?", user[:id])
-      users = @database_connection.sql("SELECT * FROM users WHERE id != #{user["id"]}")
+      users = User.where("id != ?", user[:id])
       fish = @database_connection.sql("SELECT * FROM fish WHERE user_id = #{current_user["id"]}")
 
       erb :signed_in, locals: {current_user: user, users: users, fish_list: fish}
