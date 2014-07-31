@@ -1,5 +1,9 @@
 <h2>New Fish</h2>
 
+<% if fish != nil %>
+  <p><%= fish.errors.messages.values %></p>
+<% end %>
+
 <form action="/fish" method="post">
   <ul>
     <li>

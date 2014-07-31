@@ -42,9 +42,7 @@ class App < Sinatra::Application
   end
 
   post "/sessions" do
-    if validate_authentication_params
-      user = authenticate_user
-
+    user = User.where(:usernmae => params[:username], :password => params[:password]).take
       if user != nil
         session[:user_id] = user["id"]
       else
@@ -66,7 +64,7 @@ class App < Sinatra::Application
   end
 
   get "/fish/new" do
-    erb :"fish/new"
+    erb :"fish/new", :locals => {:fish => nil}
   end
 
   get "/fish/:id" do
@@ -75,40 +73,17 @@ class App < Sinatra::Application
   end
 
   post "/fish" do
-    if validate_fish_params
-
-      Fish.create(:name => params[:name], :wikipedia_page => params[:wikipedia_page], :user_id => current_user[:id])
-
+      fish = Fish.create(:name => params[:name], :wikipedia_page => params[:wikipedia_page], :user_id => current_user[:id])
+      if fish.errors.messages == {}
       flash[:notice] = "Fish Created"
-
       redirect "/"
     else
-      erb :"fish/new"
+      erb :"fish/new", :locals => {:fish => fish}
     end
   end
 
   private
 
-
-  def validate_fish_params
-    if params[:name] != "" && params[:wikipedia_page] != ""
-      return true
-    end
-
-    error_messages = []
-
-    if params[:name] == ""
-      error_messages.push("Name is required")
-    end
-
-    if params[:wikipedia_page] == ""
-      error_messages.push("Wikipedia page is required")
-    end
-
-    flash[:notice] = error_messages.join(", ")
-
-    false
-  end
 
   def validate_authentication_params
     if params[:username] != "" && params[:password] != ""
@@ -134,10 +109,6 @@ class App < Sinatra::Application
     existing_users = User.where("username = ?", username)
 
     existing_users.length == 0
-  end
-
-  def authenticate_user
-    User.where(:username => params[:username], :password => params[:password]).take
   end
 
   def current_user
